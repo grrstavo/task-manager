@@ -4,8 +4,19 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
+                        <!-- Header with Create Button -->
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-lg font-medium text-gray-900">Tasks</h2>
+                            <button
+                                @click="openCreateModal"
+                                class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
+                            >
+                                Create Task
+                            </button>
+                        </div>
+
                         <!-- Filters -->
-                        <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="mb-6 grid grid-cols-1 md:grid-cols-5 gap-4">
                             <!-- Search -->
                             <div class="col-span-1 md:col-span-2">
                                 <input
@@ -37,6 +48,18 @@
                                     <option v-for="category in categories" :key="category.id" :value="category.id">
                                         {{ category.name }}
                                     </option>
+                                </select>
+                            </div>
+                            <!-- Due Filter -->
+                            <div>
+                                <select
+                                    v-model="selectedDue"
+                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    <option value="">All Due Dates</option>
+                                    <option value="today">Due Today</option>
+                                    <option value="overdue">Overdue</option>
+                                    <option value="upcoming">Upcoming</option>
                                 </select>
                             </div>
                         </div>
@@ -116,6 +139,28 @@
                 </div>
             </div>
         </div>
+
+        <!-- Create Task Modal -->
+        <div v-if="showCreateModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+            <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-medium text-gray-900">Create New Task</h3>
+                    <button
+                        @click="showCreateModal = false"
+                        class="text-gray-400 hover:text-gray-500"
+                    >
+                        <span class="sr-only">Close</span>
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <TaskForm
+                    :categories="categories"
+                    @task-created="handleTaskCreated"
+                />
+            </div>
+        </div>
     </AppLayout>
 </template>
 
@@ -124,13 +169,16 @@ import { ref, onMounted, watch } from 'vue';
 import { useTaskStore } from '@/stores/taskStore';
 import { storeToRefs } from 'pinia';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import TaskForm from '@/Components/TaskForm.vue';
 
 const store = useTaskStore();
 const { tasks, categories, loading, pagination } = storeToRefs(store);
 
+const showCreateModal = ref(false);
 const searchQuery = ref('');
 const selectedStatus = ref('');
 const selectedCategory = ref('');
+const selectedDue = ref('');
 
 // Watch for filter changes
 watch(searchQuery, (value) => {
@@ -145,9 +193,22 @@ watch(selectedCategory, (value) => {
     store.setFilter('category_id', value);
 });
 
+watch(selectedDue, (value) => {
+    store.setFilter('due', value);
+});
+
 // Methods
 const setPage = (page) => {
     store.setPage(page);
+};
+
+const handleTaskCreated = () => {
+    showCreateModal.value = false;
+    store.fetchTasks();
+};
+
+const openCreateModal = () => {
+    showCreateModal.value = true;
 };
 
 // Initialize data

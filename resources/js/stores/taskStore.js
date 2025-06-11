@@ -11,7 +11,8 @@ export const useTaskStore = defineStore('tasks', {
         filters: {
             status: '',
             category_id: '',
-            search: ''
+            search: '',
+            due: ''
         },
         pagination: {
             current_page: 1,
@@ -31,7 +32,8 @@ export const useTaskStore = defineStore('tasks', {
         hasFilters: (state) => 
             state.filters.status || 
             state.filters.category_id || 
-            state.filters.search
+            state.filters.search ||
+            state.filters.due
     },
 
     actions: {
@@ -74,17 +76,32 @@ export const useTaskStore = defineStore('tasks', {
             }
         },
 
+        async createTask(taskData) {
+            this.loading = true
+            this.error = null
+            try {
+                const response = await axios.post('/api/v1/tasks', taskData)
+                this.tasks.unshift(response.data.data)
+                return response.data
+            } catch (error) {
+                this.error = error.response?.data?.message || 'Failed to create task'
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
         setFilter(key, value) {
             this.filters[key] = value
-            this.pagination.current_page = 1 // Reset to first page when filter changes
+            this.pagination.current_page = 1
             this.fetchTasks()
         },
 
-        setSearch: debounce(function(value) {
+        setSearch(value) {
             this.filters.search = value
             this.pagination.current_page = 1
             this.fetchTasks()
-        }, 300),
+        },
 
         setPage(page) {
             this.pagination.current_page = page
@@ -95,7 +112,8 @@ export const useTaskStore = defineStore('tasks', {
             this.filters = {
                 status: '',
                 category_id: '',
-                search: ''
+                search: '',
+                due: ''
             }
             this.pagination.current_page = 1
             this.fetchTasks()

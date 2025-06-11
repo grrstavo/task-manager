@@ -21,6 +21,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->group(function () {
-    Route::apiResource('tasks', TaskController::class)->only(['index', 'show']);
+    Route::apiResource('tasks', TaskController::class)->only(['index', 'show', 'store']);
     Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
 });
