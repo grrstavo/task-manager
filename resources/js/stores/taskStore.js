@@ -23,12 +23,19 @@ export const useTaskStore = defineStore('tasks', {
     }),
 
     getters: {
+        // Returns the list of tasks
         getTasks: (state) => state.tasks,
+        // Returns the list of categories
         getCategories: (state) => state.categories,
+        // Returns the loading state
         isLoading: (state) => state.loading,
+        // Returns the current filters
         getFilters: (state) => state.filters,
+        // Returns the pagination object
         getPagination: (state) => state.pagination,
+        // Returns the filtered tasks (currently just all tasks)
         filteredTasks: (state) => state.tasks,
+        // Returns true if any filter is active
         hasFilters: (state) => 
             state.filters.status || 
             state.filters.category_id || 
@@ -37,6 +44,7 @@ export const useTaskStore = defineStore('tasks', {
     },
 
     actions: {
+        // Fetches tasks from the API with current filters and pagination
         async fetchTasks() {
             this.loading = true
             this.error = null
@@ -66,6 +74,7 @@ export const useTaskStore = defineStore('tasks', {
             }
         },
 
+        // Fetches categories from the API
         async fetchCategories() {
             try {
                 const response = await axios.get('/api/v1/categories')
@@ -76,6 +85,7 @@ export const useTaskStore = defineStore('tasks', {
             }
         },
 
+        // Creates a new task via the API and adds it to the local state
         async createTask(taskData) {
             this.loading = true
             this.error = null
@@ -91,23 +101,27 @@ export const useTaskStore = defineStore('tasks', {
             }
         },
 
+        // Sets a filter value and fetches tasks
         setFilter(key, value) {
             this.filters[key] = value
             this.pagination.current_page = 1
             this.fetchTasks()
         },
 
+        // Sets the search filter and fetches tasks
         setSearch(value) {
             this.filters.search = value
             this.pagination.current_page = 1
             this.fetchTasks()
         },
 
+        // Sets the current page and fetches tasks
         setPage(page) {
             this.pagination.current_page = page
             this.fetchTasks()
         },
 
+        // Resets all filters and fetches tasks
         resetFilters() {
             this.filters = {
                 status: '',

@@ -1,3 +1,20 @@
+<!--
+/**
+ * Task Creation Form Component
+ * 
+ * A form component for creating new tasks. Handles form state management,
+ * validation, and submission through the useTaskForm composable.
+ * 
+ * @component
+ * @example
+ * ```vue
+ * <TaskForm
+ *   :categories="categories"
+ *   @task-created="handleTaskCreated"
+ * />
+ * ```
+ */
+-->
 <template>
   <form @submit.prevent="handleSubmit">
     <div class="mb-4">
@@ -42,46 +59,44 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useTaskStore } from '@/stores/taskStore';
+import { useTaskForm } from '@/composables/useTaskForm'
 
+/**
+ * Component props
+ * @type {Object}
+ * @property {Array} categories - List of available categories for task assignment
+ */
 const props = defineProps({
   categories: Array
-});
-const emit = defineEmits(['task-created']);
+})
 
-const store = useTaskStore();
-const loading = computed(() => store.loading);
+/**
+ * Component emits
+ * @type {Object}
+ * @property {Function} task-created - Emitted when a task is successfully created
+ */
+const emit = defineEmits(['task-created'])
 
-const form = ref({
-  title: '',
-  description: '',
-  status: 'pending',
-  due_date: '',
-  category_id: ''
-});
-const errors = ref({});
-const formError = ref('');
+// Initialize form management using the composable
+const { form, errors, formError, loading, submitForm } = useTaskForm()
 
+/**
+ * Handles form submission
+ * Attempts to create a task and emits success event if successful
+ * 
+ * @async
+ * @function handleSubmit
+ * @example
+ * ```vue
+ * <form @submit.prevent="handleSubmit">
+ * ```
+ */
 const handleSubmit = async () => {
-  errors.value = {};
-  formError.value = '';
   try {
-    await store.createTask(form.value);
-    emit('task-created');
-    form.value = {
-      title: '',
-      description: '',
-      status: 'pending',
-      due_date: '',
-      category_id: ''
-    };
+    await submitForm()
+    emit('task-created')
   } catch (error) {
-    if (error.response && error.response.data && error.response.data.errors) {
-      errors.value = error.response.data.errors;
-    } else {
-      formError.value = error.message || 'An error occurred';
-    }
+    // Error is already handled in the composable
   }
-};
+}
 </script> 

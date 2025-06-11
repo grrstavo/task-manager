@@ -1,3 +1,24 @@
+<!--
+/**
+ * Task List Component
+ * 
+ * Displays a list of tasks with filtering, pagination, and status indicators.
+ * Includes a filter panel for searching and filtering tasks by various criteria.
+ * 
+ * @component
+ * @example
+ * ```vue
+ * <TaskList />
+ * ```
+ * 
+ * Features:
+ * - Task filtering by status, category, and search text
+ * - Pagination support
+ * - Loading and error states
+ * - Due date formatting and overdue status
+ * - Responsive design
+ */
+-->
 <template>
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <!-- Filters -->
@@ -8,7 +29,6 @@
                     <label class="block text-sm font-medium text-gray-700">Status</label>
                     <select
                         v-model="selectedStatus"
-                        @change="store.setFilter('status', selectedStatus)"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     >
                         <option value="">All Statuses</option>
@@ -23,11 +43,10 @@
                     <label class="block text-sm font-medium text-gray-700">Category</label>
                     <select
                         v-model="selectedCategory"
-                        @change="store.setFilter('category_id', selectedCategory)"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     >
                         <option value="">All Categories</option>
-                        <option v-for="category in store.categories" :key="category.id" :value="category.id">
+                        <option v-for="category in categories" :key="category.id" :value="category.id">
                             {{ category.name }}
                         </option>
                     </select>
@@ -39,7 +58,6 @@
                     <input
                         type="text"
                         v-model="searchQuery"
-                        @input="debouncedSearch"
                         placeholder="Search tasks..."
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     />
@@ -49,7 +67,7 @@
             <!-- Clear Filters -->
             <div class="mt-4 flex justify-end">
                 <button
-                    v-if="store.hasFilters"
+                    v-if="hasFilters"
                     @click="clearFilters"
                     class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
@@ -59,12 +77,12 @@
         </div>
 
         <!-- Loading State -->
-        <div v-if="store.loading" class="flex justify-center items-center py-8">
+        <div v-if="loading" class="flex justify-center items-center py-8">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
         </div>
 
         <!-- Error State -->
-        <div v-else-if="store.error" class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+        <div v-else-if="error" class="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
             <div class="flex">
                 <div class="flex-shrink-0">
                     <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -72,7 +90,7 @@
                     </svg>
                 </div>
                 <div class="ml-3">
-                    <p class="text-sm text-red-700">{{ store.error }}</p>
+                    <p class="text-sm text-red-700">{{ error }}</p>
                 </div>
             </div>
         </div>
@@ -80,7 +98,7 @@
         <!-- Task List -->
         <div v-else class="bg-white shadow overflow-hidden sm:rounded-md">
             <ul role="list" class="divide-y divide-gray-200">
-                <li v-for="task in store.tasks" :key="task.id" class="px-6 py-4">
+                <li v-for="task in tasks" :key="task.id" class="px-6 py-4">
                     <div class="flex items-center justify-between">
                         <div class="flex-1 min-w-0">
                             <h3 class="text-lg font-medium text-gray-900 truncate">{{ task.title }}</h3>
@@ -97,8 +115,8 @@
                             </div>
                         </div>
                         <div class="ml-4 flex-shrink-0">
-                            <span class="text-sm text-gray-500">
-                                Due: {{ new Date(task.due_date).toLocaleDateString() }}
+                            <span class="text-sm" :class="{ 'text-red-500': isTaskOverdue(task), 'text-gray-500': !isTaskOverdue(task) }">
+                                Due: {{ formatDueDate(task.due_date) }}
                             </span>
                         </div>
                     </div>
@@ -107,14 +125,14 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="store.pagination.last_page > 1" class="mt-6 flex justify-center">
+        <div v-if="pagination.last_page > 1" class="mt-6 flex justify-center">
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                 <button
-                    v-for="page in store.pagination.last_page"
+                    v-for="page in pagination.last_page"
                     :key="page"
-                    @click="store.setPage(page)"
+                    @click="setPage(page)"
                     :class="[
-                        page === store.pagination.current_page
+                        page === pagination.current_page
                             ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
                             : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
                         'relative inline-flex items-center px-4 py-2 border text-sm font-medium'
@@ -128,33 +146,36 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import { useTaskStore } from '@/stores/taskStore'
-import debounce from 'lodash/debounce'
+import { useTaskList } from '@/composables/useTaskList'
+import { useTaskFilters } from '@/composables/useTaskFilters'
 
-const store = useTaskStore()
-const selectedStatus = ref('')
-const selectedCategory = ref('')
-const searchQuery = ref('')
+/**
+ * Task list functionality
+ * Provides task data, loading states, and utility functions
+ * @type {Object}
+ */
+const {
+    tasks,
+    categories,
+    loading,
+    pagination,
+    error,
+    setPage,
+    isTaskOverdue,
+    formatDueDate
+} = useTaskList()
 
-// Initialize data
-onMounted(async () => {
-    await Promise.all([
-        store.fetchTasks(),
-        store.fetchCategories()
-    ])
-})
-
-// Debounced search
-const debouncedSearch = debounce((event) => {
-    store.setFilter('search', event.target.value)
-}, 300)
-
-// Clear all filters
-const clearFilters = () => {
-    selectedStatus.value = ''
-    selectedCategory.value = ''
-    searchQuery.value = ''
-    store.clearFilters()
-}
+/**
+ * Filter functionality
+ * Provides filter state and methods for managing filters
+ * @type {Object}
+ */
+const {
+    searchQuery,
+    selectedStatus,
+    selectedCategory,
+    selectedDue,
+    clearFilters,
+    hasFilters
+} = useTaskFilters()
 </script> 

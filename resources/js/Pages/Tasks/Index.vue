@@ -169,7 +169,9 @@ import { ref, onMounted, watch } from 'vue';
 import { useTaskStore } from '@/stores/taskStore';
 import { storeToRefs } from 'pinia';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import TaskForm from '@/Components/TaskForm.vue';
+import TaskForm from '@/Components/Tasks/TaskForm.vue';
+import TaskList from '@/Components/Tasks/TaskList.vue';
+import { useTaskList } from '@/composables/useTaskList';
 
 const store = useTaskStore();
 const { tasks, categories, loading, pagination } = storeToRefs(store);

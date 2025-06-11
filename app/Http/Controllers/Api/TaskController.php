@@ -3,63 +3,76 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Task;
+use App\Http\Requests\TaskRequest;
 use App\Http\Resources\TaskCollection;
 use App\Http\Resources\TaskResource;
-use App\Http\Requests\TaskRequest;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
+use App\Models\Task;
+use App\Services\TaskService;
+use Illuminate\Http\Request;
 
+/**
+ * Task API Controller
+ * 
+ * Handles HTTP requests for task operations.
+ * Uses TaskService for business logic and TaskResource for response formatting.
+ */
 class TaskController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * The task service instance.
+     *
+     * @var TaskService
      */
-    public function index(Request $request)
-    {
-        $query = Task::query()
-            ->with('category')
-            ->when($request->status, function ($query, $status) {
-                return $query->filterByStatus($status);
-            })
-            ->when($request->category_id, function ($query, $categoryId) {
-                return $query->filterByCategory($categoryId);
-            })
-            ->when($request->search, function ($query, $search) {
-                return $query->where(function ($query) use ($search) {
-                    $query->where(DB::raw('LOWER(title)'), 'like', '%' . strtolower($search) . '%')
-                        ->orWhere(DB::raw('LOWER(description)'), 'like', '%' . strtolower($search) . '%');
-                });
-            })
-            ->when($request->due, function ($query, $due) {
-                return match($due) {
-                    'today' => $query->whereDate('due_date', Carbon::today()),
-                    'overdue' => $query->whereDate('due_date', '<', Carbon::today())
-                        ->whereNotIn('status', ['completed']),
-                    'upcoming' => $query->whereDate('due_date', '>', Carbon::today())
-                        ->whereNotIn('status', ['completed']),
-                    default => $query
-                };
-            });
+    protected $taskService;
 
-        $tasks = $query->latest()->paginate(10);
+    /**
+     * Create a new controller instance.
+     *
+     * @param TaskService $taskService
+     */
+    public function __construct(TaskService $taskService)
+    {
+        $this->taskService = $taskService;
+    }
+
+    /**
+     * Display a listing of tasks.
+     *
+     * @param Request $request
+     * @return TaskCollection
+     */
+    public function index(Request $request): TaskCollection
+    {
+        $filters = [
+            'status' => $request->status,
+            'category_id' => $request->category_id,
+            'search' => $request->search,
+            'due' => $request->due,
+        ];
+
+        $tasks = $this->taskService->getTasks($filters, $perPage = 10);
         return new TaskCollection($tasks);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created task.
+     *
+     * @param TaskRequest $request
+     * @return TaskResource
      */
-    public function store(TaskRequest $request)
+    public function store(TaskRequest $request): TaskResource
     {
-        $task = Task::create($request->validated());
-        return new TaskResource($task->load('category'));
+        $task = $this->taskService->createTask($request->validated());
+        return new TaskResource($task);
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified task.
+     *
+     * @param Task $task
+     * @return TaskResource
      */
-    public function show(Task $task)
+    public function show(Task $task): TaskResource
     {
         return new TaskResource($task->load('category'));
     }
