@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useTaskStore } from '@/stores/taskStore'
 
 /**
@@ -67,6 +67,58 @@ export function useTaskForm() {
      */
     const formError = ref('')
 
+    const touched = ref({})
+
+    // Mark field as touched when user interacts with it
+    const touch = (field) => {
+        touched.value[field] = true
+        validateField(field)
+    }
+
+    // Validate a single field
+    const validateField = (field) => {
+        errors.value[field] = ''
+
+        switch (field) {
+            case 'title':
+                if (!form.value.title.trim()) {
+                    errors.value.title = 'Title is required'
+                } else if (form.value.title.length < 3) {
+                    errors.value.title = 'Title must be at least 3 characters'
+                } else if (form.value.title.length > 255) {
+                    errors.value.title = 'Title cannot be longer than 255 characters'
+                }
+                break
+
+            case 'status':
+                if (!form.value.status) {
+                    errors.value.status = 'Status is required'
+                } else if (!['pending', 'in_progress', 'completed'].includes(form.value.status)) {
+                    errors.value.status = 'Invalid status'
+                }
+                break
+
+            case 'due_date':
+                if (form.value.due_date) {
+                    const today = new Date()
+                    today.setHours(0, 0, 0, 0)
+                    const dueDate = new Date(form.value.due_date)
+                    if (dueDate < today) {
+                        errors.value.due_date = 'Due date cannot be in the past'
+                    }
+                }
+                break
+        }
+    }
+
+    // Validate all fields
+    const validateForm = () => {
+        ['title', 'status', 'due_date'].forEach(field => {
+            touch(field)
+        })
+        return Object.keys(errors.value).length === 0
+    }
+
     /**
      * Resets the form to its initial state
      * Clears all form data, validation errors, and global error message
@@ -86,6 +138,7 @@ export function useTaskForm() {
         }
         errors.value = {}
         formError.value = ''
+        touched.value = {}
     }
 
     /**
@@ -107,6 +160,11 @@ export function useTaskForm() {
      * ```
      */
     const submitForm = async () => {
+        if (!validateForm()) {
+            formError.value = 'Please fix the errors before submitting'
+            return
+        }
+
         errors.value = {}
         formError.value = ''
         
@@ -124,17 +182,27 @@ export function useTaskForm() {
         }
     }
 
+    // Computed property to check if form is valid
+    const isValid = computed(() => {
+        return form.value.title.trim() !== '' && 
+               form.value.status !== '' &&
+               (!form.value.due_date || new Date(form.value.due_date) >= new Date().setHours(0,0,0,0))
+    })
+
     return {
         // Form state
         form,
         errors,
         formError,
+        touched,
+        touch,
+        isValid,
         
         // Methods
         resetForm,
         submitForm,
         
         // Store state
-        loading: store.loading
+        loading: computed(() => store.loading)
     }
 } 

@@ -23,7 +23,7 @@ class TaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'min:3', 'max:255'],
             'description' => ['nullable', 'string'],
             'status' => ['required', 'string', 'in:' . implode(',', TaskStatus::values())],
             'due_date' => ['nullable', 'date', 'after_or_equal:today'],
