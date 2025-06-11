@@ -65,15 +65,22 @@ task-manager/
 ├── resources/
 │   └── js/
 │       ├── Components/
-│       │   └── Tasks/
-│       │       ├── TaskForm.vue
-│       │       └── TaskList.vue
+│       │   ├── Tasks/
+│       │   |   ├── TaskForm.vue
+│       │   |   └── TaskList.vue
+|       |   ├── ApplicationLogo.vue
+|       |   ├── Modal.vue
+|       |   ├── Navigation.vue
+|       |   └── NavigationLink.vue
+│       ├── composables/
+|       |   ├── useTaskFilters.vue
+|       |   ├── useTaskForm.vue
+|       |   └── useTaskList.vue
 │       ├── Pages/
 │       │   └── Tasks/
 │       │       └── Index.vue
 │       └── stores/
-│           ├── taskStore.js
-│           └── categoryStore.js
+│           └── taskStore.js
 └── docker/
     ├── nginx/
     ├── postgres/
