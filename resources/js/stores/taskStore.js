@@ -74,6 +74,21 @@ export const useTaskStore = defineStore('tasks', {
             }
         },
 
+        async createTask(taskData) {
+            this.loading = true
+            this.error = null
+            try {
+                const response = await axios.post('/api/v1/tasks', taskData)
+                this.tasks.unshift(response.data.data)
+                return response.data
+            } catch (error) {
+                this.error = error.response?.data?.message || 'Failed to create task'
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
         setFilter(key, value) {
             this.filters[key] = value
             this.pagination.current_page = 1 // Reset to first page when filter changes

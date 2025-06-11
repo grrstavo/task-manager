@@ -35,6 +35,15 @@ class TaskController extends Controller
     }
 
     /**
+     * Store a newly created resource in storage.
+     */
+    public function store(TaskRequest $request)
+    {
+        $task = Task::create($request->validated());
+        return new TaskResource($task->load('category'));
+    }
+
+    /**
      * Display the specified resource.
      */
     public function show(Task $task)
