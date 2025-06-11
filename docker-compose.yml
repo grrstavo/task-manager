@@ -13,6 +13,7 @@ services:
       - task-manager-network
     depends_on:
       - db
+      - redis
 
   nginx:
     image: nginx:alpine
@@ -45,6 +46,23 @@ services:
       - task-manager-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d task_manager"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    container_name: task-manager-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./docker/redis:/data
+    networks:
+      - task-manager-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5

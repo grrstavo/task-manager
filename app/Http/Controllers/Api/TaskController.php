@@ -48,6 +48,7 @@ class TaskController extends Controller
             'category_id' => $request->category_id,
             'search' => $request->search,
             'due' => $request->due,
+            'page' => $request->page,
         ];
 
         $tasks = $this->taskService->getTasks($filters, $perPage = 10);

@@ -4,9 +4,13 @@ namespace App\Services;
 
 use App\Repositories\Interfaces\TaskRepositoryInterface;
 use App\Events\TaskCreated;
+use App\Events\TaskUpdated;
+use App\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use InvalidArgumentException;
 
 /**
  * Task Service
@@ -17,6 +21,9 @@ use Illuminate\Http\Request;
  */
 class TaskService
 {
+    private const CACHE_TTL = 3600; // 1 hour in seconds
+    private const CACHE_PREFIX = 'tasks';
+
     /**
      * @var TaskRepositoryInterface
      */
@@ -39,9 +46,13 @@ class TaskService
      * @param int $perPage
      * @return LengthAwarePaginator
      */
-    public function getTasks(array $filters, int $perPage = 10): LengthAwarePaginator
+    public function getTasks(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
-        return $this->taskRepository->getPaginatedTasks($filters, $perPage);
+        $cacheKey = $this->generateCacheKey($filters, $perPage);
+
+        return Cache::tags([self::CACHE_PREFIX])->remember($cacheKey, self::CACHE_TTL, function () use ($filters, $perPage) {
+            return $this->taskRepository->getPaginatedTasks($filters, $perPage);
+        });
     }
 
     /**
@@ -52,22 +63,70 @@ class TaskService
      */
     public function createTask(array $data)
     {
-        // Set default status if not provided
-        if (!isset($data['status'])) {
+        $data = $this->validateAndFormatTaskData($data);
+        $task = $this->taskRepository->create($data);
+
+        // Clear task list cache
+        $this->clearTaskCache();
+
+        event(new TaskCreated($task));
+        
+        return $task;
+    }
+
+    /**
+     * Validate and format task data
+     *
+     * @param array $data
+     * @param bool $setDefaults
+     * @return array
+     */
+    private function validateAndFormatTaskData(array $data, bool $setDefaults = true): array
+    {
+        if ($setDefaults && !isset($data['status'])) {
             $data['status'] = 'pending';
         }
 
-        // Validate and format due date
-        if (isset($data['due_date'])) {
-            $data['due_date'] = Carbon::parse($data['due_date'])->startOfDay();
+        if (isset($data['status']) && !in_array($data['status'], ['pending', 'in_progress', 'completed'])) {
+            throw new InvalidArgumentException('Invalid status value');
         }
 
-        // Create task
-        $task = $this->taskRepository->create($data);
+        if (isset($data['due_date'])) {
+            $data['due_date'] = Carbon::parse($data['due_date']);
+        }
 
-        // Dispatch event
-        event(new TaskCreated($task));
+        return $data;
+    }
 
-        return $task;
+    /**
+     * Generate cache key
+     *
+     * @param array $params
+     * @param int|null $perPage
+     * @return string
+     */
+    private function generateCacheKey(array $params = [], ?int $perPage = null): string
+    {
+        $key = self::CACHE_PREFIX;
+        
+        if (!empty($params)) {
+            $key .= ':' . md5(json_encode($params));
+        }
+        
+        if ($perPage !== null) {
+            $key .= ':page_' . $perPage;
+        }
+        
+        return $key;
+    }
+
+    /**
+     * Clear task cache
+     *
+     * @return void
+     */
+    private function clearTaskCache(): void
+    {
+        Cache::flush();
     }
 } 
