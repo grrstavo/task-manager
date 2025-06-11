@@ -25,8 +25,9 @@ class TaskFactory extends Factory
             'title' => fake()->sentence(3),
             'description' => fake()->paragraph(),
             'status' => fake()->randomElement(TaskStatus::values()),
-            'due_date' => fake()->dateTimeBetween('now', '+2 months'),
+            'due_date' => fake()->dateTimeBetween('-1 month', '+2 months'),
             'category_id' => Category::inRandomOrder()->first()->id,
+            'created_at' => fake()->dateTimeBetween('-1 month', 'now'),
         ];
     }
 }
