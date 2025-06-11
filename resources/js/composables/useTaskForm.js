@@ -102,7 +102,7 @@ export function useTaskForm() {
                 if (form.value.due_date) {
                     const today = new Date()
                     today.setHours(0, 0, 0, 0)
-                    const dueDate = new Date(form.value.due_date)
+                    const dueDate = new Date(form.value.due_date + 'T00:00:00')
                     if (dueDate < today) {
                         errors.value.due_date = 'Due date cannot be in the past'
                     }
@@ -116,7 +116,8 @@ export function useTaskForm() {
         ['title', 'status', 'due_date'].forEach(field => {
             touch(field)
         })
-        return Object.keys(errors.value).length === 0
+
+        return Object.values(errors.value).every(error => error === '')
     }
 
     /**
@@ -186,7 +187,7 @@ export function useTaskForm() {
     const isValid = computed(() => {
         return form.value.title.trim() !== '' && 
                form.value.status !== '' &&
-               (!form.value.due_date || new Date(form.value.due_date) >= new Date().setHours(0,0,0,0))
+               (!form.value.due_date || new Date(form.value.due_date + 'T00:00:00') >= new Date().setHours(0,0,0,0))
     })
 
     return {

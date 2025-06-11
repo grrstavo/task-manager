@@ -24,6 +24,18 @@
         <!-- Filters -->
         <div class="mb-6 bg-white shadow rounded-lg p-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+                <!-- Search -->
+                <div class="col-span-3">
+                    <label class="block text-sm font-medium text-gray-700">Search</label>
+                    <input
+                        type="text"
+                        v-model="searchQuery"
+                        placeholder="Search tasks..."
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                </div>
+
                 <!-- Status Filter -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Status</label>
@@ -33,7 +45,7 @@
                     >
                         <option value="">All Statuses</option>
                         <option value="pending">Pending</option>
-                        <option value="in progress">In Progress</option>
+                        <option value="in_progress">In Progress</option>
                         <option value="completed">Completed</option>
                     </select>
                 </div>
@@ -52,15 +64,19 @@
                     </select>
                 </div>
 
-                <!-- Search -->
+                <!-- Due Filter -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Search</label>
-                    <input
-                        type="text"
-                        v-model="searchQuery"
-                        placeholder="Search tasks..."
+                    <label class="block text-sm font-medium text-gray-700">Due Date</label>
+                    <select
+                        v-model="selectedDue"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    />
+                    >
+
+                        <option value="">All Due Dates</option>
+                        <option value="today">Due Today</option>
+                        <option value="overdue">Overdue</option>
+                        <option value="upcoming">Upcoming</option>
+                    </select>
                 </div>
             </div>
 
