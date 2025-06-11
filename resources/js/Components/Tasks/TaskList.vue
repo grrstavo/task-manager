@@ -121,8 +121,15 @@
                             <p class="mt-1 text-sm text-gray-500">{{ task.description }}</p>
                             <div class="mt-2 flex items-center text-sm text-gray-500">
                                 <span class="flex items-center">
-                                    <span :class="`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${task.status_color}-100 text-${task.status_color}-800`">
-                                        {{ task.status_label }}
+                                    <span
+                                        :class="{
+                                            'bg-gray-100 text-gray-800': task.status === 'pending',
+                                            'bg-blue-100 text-blue-800': task.status === 'in_progress',
+                                            'bg-green-100 text-green-800': task.status === 'completed'
+                                        }"
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                    >
+                                        {{ formatStatus(task.status) }}
                                     </span>
                                     <span v-if="task.category" class="ml-4">
                                         {{ task.category.name }}
@@ -212,4 +219,10 @@ const {
     clearFilters,
     hasFilters
 } = useTaskFilters()
+
+function formatStatus(status) {
+    return status.split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+}
 </script> 
