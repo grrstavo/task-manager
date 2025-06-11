@@ -141,7 +141,25 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="pagination.last_page > 1" class="mt-6 flex justify-center">
+        <div v-if="pagination.last_page > 1" class="mt-6 flex justify-between">
+            <div class="flex items-left justify-between mt-4">
+                <div class="text-sm text-gray-700">
+                    <span class="font-semibold">
+                        {{ (pagination.current_page - 1) * pagination.per_page + 1 }}
+                    </span>
+                    to
+                    <span class="font-semibold">
+                        {{
+                            Math.min(
+                                pagination.current_page * pagination.per_page,
+                                pagination.total
+                            )
+                        }}
+                    </span>
+                    of
+                    <span class="font-semibold">{{ pagination.total }}</span>
+                </div>
+            </div>
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                 <button
                     v-for="page in pagination.last_page"
