@@ -47,14 +47,18 @@ export const useTaskStore = defineStore('tasks', {
                 
                 const response = await axios.get('/api/v1/tasks', { params })
                 this.tasks = response.data.data
+                
+                // Handle pagination data that comes as arrays
+                const meta = response.data.meta
                 this.pagination = {
-                    current_page: response.data.current_page,
-                    last_page: response.data.last_page,
-                    per_page: response.data.per_page,
-                    total: response.data.total
+                    current_page: Array.isArray(meta.current_page) ? meta.current_page[0] : meta.current_page,
+                    last_page: Array.isArray(meta.last_page) ? meta.last_page[0] : meta.last_page,
+                    per_page: Array.isArray(meta.per_page) ? meta.per_page[0] : meta.per_page,
+                    total: Array.isArray(meta.total) ? meta.total[0] : meta.total
                 }
             } catch (error) {
                 console.error('Error fetching tasks:', error)
+                this.error = error.response?.data?.message || 'Error fetching tasks'
             } finally {
                 this.loading = false
             }
@@ -66,6 +70,7 @@ export const useTaskStore = defineStore('tasks', {
                 this.categories = response.data.data
             } catch (error) {
                 console.error('Error fetching categories:', error)
+                this.error = error.response?.data?.message || 'Error fetching categories'
             }
         },
 

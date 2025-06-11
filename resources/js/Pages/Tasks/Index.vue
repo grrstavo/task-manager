@@ -83,9 +83,14 @@
                             <!-- Pagination -->
                             <div class="mt-6 flex justify-between items-center">
                                 <div class="text-sm text-gray-700">
-                                    Showing {{ pagination.total > 0 ? (pagination.current_page - 1) * pagination.per_page + 1 : 0 }}
-                                    to {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }}
-                                    of {{ pagination.total }} results
+                                    <template v-if="pagination.total > 0">
+                                        Showing {{ (pagination.current_page - 1) * pagination.per_page + 1 }}
+                                        to {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }}
+                                        of {{ pagination.total }} results
+                                    </template>
+                                    <template v-else>
+                                        No results found
+                                    </template>
                                 </div>
                                 <div class="flex space-x-2">
                                     <button
