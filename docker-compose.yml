@@ -44,11 +44,6 @@ services:
       - "5432:5432"
     networks:
       - task-manager-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d task_manager"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis:
     image: redis:alpine
@@ -60,12 +55,6 @@ services:
       - ./docker/redis:/data
     networks:
       - task-manager-network
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   node:
     image: node:20

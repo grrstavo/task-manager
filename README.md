@@ -1,66 +1,143 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Task Manager Application
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A task management application built with Laravel and Vue.js, featuring real-time validation, efficient data handling, and a responsive user interface.
 
-## About Laravel
+## 🚀 Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- ✅ Task management with categories
+- 📱 Responsive design
+- 🔍 Advanced filtering and search
+- 📊 Pagination
+- ⚡ Real-time validation
+- 🎨 Status-based styling
+- 🗄️ Category organization
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Requirements
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+
+- Node.js 20+
+- Docker
+- Composer
 
-## Learning Laravel
+## 🛠️ Installation
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd task-manager
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+2. **Start Docker containers**
+```bash
+docker compose up -d
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+3. **Run migrations**
+```bash
+docker compose exec app php artisan migrate:fresh --seed
+```
 
-## Laravel Sponsors
+The application will be available at `http://localhost:8000`
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 📁 Project Structure
 
-### Premium Partners
+```
+task-manager/
+├── app/
+|   ├── Enum/
+│   |   └── TaskStatus.php
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   └── Api/
+|   |   |       ├── CategoryController.php
+│   │   │       └── TaskController.php
+│   │   └── Requests/
+│   │       └── TaskRequest.php
+│   ├── Models/
+│   │   ├── Task.php
+│   │   └── Category.php
+│   ├── Repositories/
+│   │   ├── Interfaces/
+|   |   |   └── TaskRepositoryInterface.php
+│   │   └── TaskRepository.php
+│   └── Services/
+│       └── TaskService.php
+├── resources/
+│   └── js/
+│       ├── Components/
+│       │   └── Tasks/
+│       │       ├── TaskForm.vue
+│       │       └── TaskList.vue
+│       ├── Pages/
+│       │   └── Tasks/
+│       │       └── Index.vue
+│       └── stores/
+│           ├── taskStore.js
+│           └── categoryStore.js
+└── docker/
+    ├── nginx/
+    ├── postgres/
+    └── redis/
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## 🔧 Technologies Used
 
-## Contributing
+### Backend
+- **Laravel 10** - PHP Framework
+- **PostgreSQL** - Database
+- **Redis** - Caching
+- **Docker** - Containerization
+- **Nginx** - Web Server
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Frontend
+- **Vue.js 3** - JavaScript Framework
+- **Inertia.js** - Server-Side Rendering
+- **Pinia** - State Management
+- **Tailwind CSS** - Styling
+- **Vite** - Build Tool
 
-## Code of Conduct
+## 💼 Business Rules
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Task Management
+1. Tasks must have:
+   - Title (3-255 characters)
+   - Description (optional)
+   - Status (pending, in_progress, completed)
+   - Due Date (optional, must be today or future date)
+   - Category (optional)
 
-## Security Vulnerabilities
+2. Task Statuses:
+   - **Pending**: Default status for new tasks
+   - **In Progress**: Tasks currently being worked on
+   - **Completed**: Tasks that have been finished
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+3. Task Filtering:
+   - Filter by status
+   - Filter by category
+   - Filter by due date (today, overdue, upcoming)
+   - Search by title/description
 
-## License
+### Data Display
+1. Tasks are displayed in a paginated list
+2. Each page shows 10 tasks by default
+3. Tasks can be sorted by:
+   - Creation date (default)
+   - Due date
+   - Categories
+   - Status
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Validation Rules
+1. Task Creation:
+   - Title is required and must be 3-255 characters
+   - Due date must be today or in the future
+   - Status must be a valid enum value
+   - Category must exist in the database
+
+2. Real-time Validation:
+   - Form validation occurs on both client and server side
+   - Immediate feedback for validation errors
+   - Submit button disabled until form is valid
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
