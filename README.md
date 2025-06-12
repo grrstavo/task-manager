@@ -6,7 +6,7 @@ A task management application built with Laravel and Vue.js, featuring real-time
 
 - ✅ Task management with categories
 - 📱 Responsive design
-- 🔍 Advanced filtering and search
+- 🔍 Filtering and search
 - 📊 Pagination
 - ⚡ Real-time validation
 - 🎨 Status-based styling
@@ -144,6 +144,10 @@ task-manager/
    - Form validation occurs on both client and server side
    - Immediate feedback for validation errors
    - Submit button disabled until form is valid
+
+### Additional Rules
+1. Overdue tasks are visually highlighted
+2. Tasks can be deleted by users who have access to them
 
 ## 📝 License
 
