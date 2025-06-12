@@ -121,6 +121,16 @@ export function useTaskList() {
         return new Date(date).toLocaleDateString()
     }
 
+    /**
+     * Deletes a task via the API and removes it from the local state
+     * 
+     * @param {number} taskId - The ID of the task to delete
+     * @returns {Promise<void>}
+     */
+    const deleteTask = async (taskId) => {
+        await store.deleteTask(taskId)
+    }
+
     // Initialize data on component mount
     onMounted(() => {
         initializeData()
@@ -138,6 +148,7 @@ export function useTaskList() {
         setPage,
         isTaskOverdue,
         formatDueDate,
-        initializeData
+        initializeData,
+        deleteTask
     }
 } 

@@ -9,6 +9,7 @@ use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use App\Services\TaskService;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 /**
  * Task API Controller
@@ -76,5 +77,25 @@ class TaskController extends Controller
     public function show(Task $task): TaskResource
     {
         return new TaskResource($task->load('category'));
+    }
+
+    /**
+     * Delete a task.
+     *
+     * @param int $id Task ID
+     * @return JsonResponse
+     */
+    public function destroy(int $id): JsonResponse
+    {
+        try {
+            $this->taskService->deleteTask($id);
+            return response()->json([
+                'message' => 'Task deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to delete task'
+            ], 500);
+        }
     }
 }

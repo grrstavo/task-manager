@@ -87,4 +87,26 @@ class TaskRepository implements TaskRepositoryInterface
     {
         return $this->model->create($data);
     }
+
+    /**
+     * Find a task by ID
+     *
+     * @param int $id Task ID
+     * @return Task|null
+     */
+    public function find(int $id): ?Task
+    {
+        return Task::find($id);
+    }
+
+    /**
+     * Delete a task by ID
+     *
+     * @param int $id Task ID
+     * @return void
+     */
+    public function delete(int $id): void
+    {
+        Task::destroy($id);
+    }
 } 

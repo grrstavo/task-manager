@@ -98,6 +98,25 @@ class TaskService
         return $data;
     }
 
+
+    /**
+     * Delete a task by ID
+     *
+     * @param int $id Task ID
+     * @return void
+     */
+    public function deleteTask(int $id): void
+    {
+        $task = $this->taskRepository->find($id);
+        
+        if (!$task) {
+            throw new \Exception('Task not found');
+        }
+
+        $this->taskRepository->delete($id);
+        $this->clearTaskCache();
+    }
+
     /**
      * Generate cache key
      *

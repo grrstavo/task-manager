@@ -101,6 +101,19 @@ export const useTaskStore = defineStore('tasks', {
             }
         },
 
+        // Deletes a task via the API and removes it from the local state
+        async deleteTask(taskId) {
+            try {
+                await axios.delete(`/api/v1/tasks/${taskId}`)
+                // Remove the task from the local state
+                this.tasks = this.tasks.filter(task => task.id !== taskId)
+                // Update total in pagination
+                this.pagination.total--
+            } catch (error) {
+                throw error.response?.data?.message || 'Failed to delete task'
+            }
+        },
+
         // Sets a filter value and fetches tasks
         setFilter(key, value) {
             this.filters[key] = value
@@ -131,6 +144,6 @@ export const useTaskStore = defineStore('tasks', {
             }
             this.pagination.current_page = 1
             this.fetchTasks()
-        }
+        },
     }
 })

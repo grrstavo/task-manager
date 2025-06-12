@@ -29,4 +29,20 @@ interface TaskRepositoryInterface
      * @return Task
      */
     public function create(array $data): Task;
+
+    /**
+     * Find a task by ID
+     *
+     * @param int $id Task ID
+     * @return Task|null
+     */
+    public function find(int $id): ?Task;
+
+    /**
+     * Delete a task by ID
+     *
+     * @param int $id Task ID
+     * @return void
+     */
+    public function delete(int $id): void;
 } 
