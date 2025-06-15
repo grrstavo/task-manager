@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\CategoryController;
@@ -15,10 +14,6 @@ use App\Http\Controllers\Api\CategoryController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
 Route::prefix('v1')->group(function () {
     Route::apiResource('tasks', TaskController::class)->only(['index', 'show', 'store', 'destroy']);
