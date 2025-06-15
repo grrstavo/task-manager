@@ -118,7 +118,9 @@ export function useTaskList() {
      */
     const formatDueDate = (date) => {
         if (!date) return 'No due date'
-        return new Date(date).toLocaleDateString()
+        return new Date(date).toLocaleDateString('pt-BR', {
+            timeZone: 'UTC'
+        })
     }
 
     /**
